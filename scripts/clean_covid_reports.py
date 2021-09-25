@@ -62,13 +62,13 @@ def create_panel(table : list,
 
 ## == ## == ## == ## == ## == ## == ## == ## == ## == ## == ## == ## == ##
 
-all_reports = os.listdir(r'data/RAW/MS')
+all_reports = os.listdir(r'data/raw/ms-dsei/')
 
 for report in all_reports:
     
     print(report)
             
-    text = get_raw_text(file = r'data/RAW/MS/' + report).lower()
+    text = get_raw_text(file = r'data/raw/ms-dsei/' + report).lower()
     
     table = generate_table(text = text, index = INDEX)
     
@@ -86,5 +86,5 @@ for report in all_reports:
     
     df['Data'] = date
             
-    df.to_csv(r'data/cleaned/MS/' + report[:-4] + '.csv')
+    df.to_csv(r'data/cleaned/ms-dsei/' + report[:-4] + '.csv')
 

@@ -5,7 +5,7 @@ Created on Mon Sep  6 12:05:05 2021
 @author: flpma
 """
 import pandas as pd
-x = r'D:\FEA\Econometria 3\dados\INPE\2020\Focos_2020-01-01_2020-12-31.csv'
+x = r'C:\Users\felip\OneDrive\Documentos\FEA\Econometria 3\data\cleaned\inpe\Focos_2020-01-01_2020-12-31.csv'
 df = pd.read_csv(x)
 
 import camelot

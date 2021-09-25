@@ -17,5 +17,6 @@ for date in dates:
         continue
 
     with open(f'report-{current_date}.pdf', 'wb') as f:
+        print(f'report-{current_date}.pdf')
         f.write(response.content)
     

@@ -1,39 +1,18 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Sep 10 10:35:42 2021
-
-@author: bailez
-"""
-
-import geopandas as gpd
-import pandas as pd
-import os
-all_reports = os.listdir(r'data/cleaned/MS')
-areas = gpd.read_file(r'data/cleaned/areas_dsei/areas_dsei.shp')
-covid = pd.read_csv(r'data/cleaned/MS/'+ all_reports[-1])
-
-
-from shapely.geometry.polygon import Polygon
-
-point = Point(-35, -7)
-polygon = areas[areas['dsei']=='ARAGUAIA']['geometry'].values[0]
-print(polygon.contains(point))
-
-
-
-# %%
 import geopandas as gpd
 from shapely.geometry import Point
 import pandas as pd
 import matplotlib.pyplot as plt
 import os
 
-all_reports = os.listdir(r'data/cleaned/MS')
+all_reports = os.listdir(r'data/cleaned/ms-dsei')
 
-areas = gpd.read_file(r'data/cleaned/areas_dsei/areas_dsei.shp')
+aldeias = r'cleaned/funai/aldeias/aldeiasPoint.shp'
 
-queimada = pd.read_csv(r'data/cleaned/INPE/2021/Focos_2021-01-01_2021-09-06.csv')
+ald = gpd.read_file(aldeias)
+
+areas = gpd.read_file(r'data/cleaned/funai/areas_dsei/areas_dsei.shp')
+
+queimada = pd.read_csv(r'data/cleaned/inpe/Focos_2021-01-01_2021-09-06.csv')
 
 
 queimada['datahora'] = pd.to_datetime(queimada.datahora)
@@ -61,7 +40,7 @@ for i in q_set.index:
         
     
 
-covid = pd.read_csv(r'data/cleaned/MS/'+ all_reports[-1])
+covid = pd.read_csv(r'data/cleaned/ms-dsei/'+ all_reports[-1])
 
 df = areas.copy()
 
@@ -87,8 +66,10 @@ ax = fig.add_subplot(111)
 title = 'Letalidade de COVID por DSEI'
 plt.title(title + '\n', fontsize=19)
 
-df.plot(column='letalidade', cmap='summer_r', ax= ax, legend = True, label='Letalidade')
+df.plot(column='casos', cmap='summer_r', ax= ax, legend = True, label='Letalidade')
+
 q_set.plot(alpha=0.15, ax = ax, markersize = 'frp', edgecolor='black', color='red')
+ald.plot(alpha=0.8, ax = ax, markersize=1, color='yellow',edgecolor='black')
 q_set.iloc[49:50,:].plot(alpha=0.5, ax = ax, markersize = 100, edgecolor='black', color='red', label='Queimadas')
 plt.legend()
 
