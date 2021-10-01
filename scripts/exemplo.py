@@ -22,12 +22,8 @@ Grafico em nivel
 '''
 
 fig = plt.figure(figsize=(10, 6))
-
-
 plt.title('Grafico em nivel', fontsize=19)
 df.plot(lw=2)
-
-
 plt.plot()
 
 # %%
@@ -36,12 +32,8 @@ Primeiras diferenças
 '''
 
 fig = plt.figure(figsize=(10, 6))
-
-
-plt.title('Grafico em log', fontsize=19)
+plt.title('Primeiras diferenças', fontsize=19)
 df.diff().plot(lw=2)
-
-
 plt.plot()
 
 # %%
@@ -49,12 +41,8 @@ plt.plot()
 Autocorrelação
 '''
 fig, ax = plt.subplots(1,1,figsize=(10,6))
-
 title = 'Grafico de autocorrelação'
-
 plot_acf(df, lags=36, ax = ax, title = title)
-
-
 plt.plot()
 
 # %% Plot Sazonal 
@@ -75,14 +63,11 @@ plt.plot()
 Histograma
 '''
 fig, ax = plt.subplots(1,1,figsize=(10,6))
-
 title = 'Histograma das primeiras diferenças'
-
 df.diff().plot(bins=20, 
                     ax = ax, 
                     kind='hist', 
                     title=title)
-
 ax.set_ylabel('Frequência')
 plt.plot()
 
@@ -91,7 +76,6 @@ plt.plot()
 Dispersão dos lags
 '''
 fig, ax = plt.subplots(1,1,figsize=(10,6))
-
 title = 'Dispersão dos lags'
 pd.plotting.lag_plot(df.diff(), ax = ax)
 ax.set_title(title)
