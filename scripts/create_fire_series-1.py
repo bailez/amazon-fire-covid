@@ -54,23 +54,27 @@ covid['letalidade'] = covid['Obitos']/covid['Casos Confirmados']
 
 df['letalidade'] = covid['letalidade']
 
-#df.plot(column='letalidade')
+df.plot(column='letalidade')
 
 df['casos'] = covid['Casos Confirmados']
 
 
 # %%
-fig = plt.figure(figsize=(9, 7))
+fig = plt.figure(figsize=(7, 6))
 ax = fig.add_subplot(111)
 
 title = 'Letalidade de COVID por DSEI'
 plt.title(title + '\n', fontsize=19)
 
-df.plot(column='letalidade', cmap='summer_r', ax= ax, legend = True, label='Letalidade')
+df.plot(ax= ax, legend = True, color = 'green', lw=1,)
 
-q_set.plot(alpha=0.15, ax = ax, markersize = 'frp', edgecolor='black', color='red')
-ald.plot(alpha=0.8, ax = ax, markersize=0.5, color='blue',edgecolor='black')
-q_set.iloc[49:50,:].plot(alpha=0.5, ax = ax, markersize = 100, edgecolor='black', color='red', label='Queimadas')
+for i in range(10):
+    plt.text(float(merge.longitude[i]),
+             float(merge.latitude[i]),"{}\n{}".format(merge.name[i]),size=10)
+
+#q_set.plot(alpha=0.15, ax = ax, markersize = 'frp', edgecolor='black', color='red')
+#ald.plot(alpha=0.8, ax = ax, markersize=0.2,edgecolor='red')
+#q_set.iloc[49:50,:].plot(alpha=0.5, ax = ax, markersize = 100, edgecolor='black', color='red', label='Queimadas')
 plt.legend()
 
 

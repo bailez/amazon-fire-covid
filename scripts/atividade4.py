@@ -9,8 +9,7 @@ all_reports = os.listdir(r'data/cleaned/ms-dsei/')
 
 reports = list()
 
-for i in all_reports:
-    
+for i in all_reports:    
     rep = pd.read_csv(r'data/cleaned/ms-dsei/' + i)
     reports.append(rep)
 
@@ -22,7 +21,6 @@ deceased = df.pivot(columns='DSEI', index = 'Data', values='Obitos').sort_index(
 
 letalidade = deceased/confirmed
 
-
 conf_agg = confirmed.sum(axis=1)
 
 dec_agg = deceased.sum(axis=1)
@@ -32,18 +30,18 @@ let_agg = conf_agg/dec_agg
 
 param = confirmed.copy()
 
-N = 10
+l_b = 0
+u_b = 10
 
 sel = param.iloc[-1,:].sort_values(ascending=False)
 
-sel = list(sel.iloc[:N].index)
-
+sel = list(sel.iloc[l_b:u_b].index)
 
 
 
 # %% Casos Confirmados Diário
 
-fig = plt.figure(figsize=(14, 7))
+fig = plt.figure(figsize=(13, 6))
 #ax = fig.add_subplot(111)
 
 plt.title('Casos Confirmados de Covid19 por DSEI', fontsize=19)
@@ -55,64 +53,91 @@ plt.legend()
 plt.xticks(rotation=30)
 
 plt.plot()
-# %% Casos Confirmados Diário TRANSFORMAÇÕES
+# %% Casos Confirmados Diário
 
-fig = plt.figure(figsize=(14, 7))
-
-
-plt.title('Casos Confirmados de Covid19 por DSEI', fontsize=19)
-for i in sel:
-    confirmed[i].diff().plot(lw=2)
-
-
-plt.legend()
-plt.xticks(rotation=30)
-
-plt.plot()
-
-
-# %% Obitos
-
-fig = plt.figure(figsize=(14, 7))
+fig = plt.figure(figsize=(13, 6))
 #ax = fig.add_subplot(111)
 
-plt.title('Obitos de Covid19 por DSEI', fontsize=19)
+plt.title('Óbitos por Covid19 por DSEI ', fontsize=19)
 for i in sel:
     deceased[i].plot(lw=2)
 
-#conf_agg.diff().rolling(7).mean().plot(label='7-day rolling mean', ls='--', color='black')
 
 plt.legend()
 plt.xticks(rotation=30)
 
 plt.plot()
+# %%
 
-# %% Letalidade
-
-fig = plt.figure(figsize=(14, 7))
+fig = plt.figure(figsize=(13, 6))
 #ax = fig.add_subplot(111)
 
 plt.title('Letalidade de Covid19 por DSEI', fontsize=19)
 for i in sel:
     letalidade[i].plot(lw=2)
 
-#conf_agg.diff().rolling(7).mean().plot(label='7-day rolling mean', ls='--', color='black')
+
+plt.legend()
+plt.xticks(rotation=30)
+
+plt.plot()
+# %%
+
+fig = plt.figure(figsize=(13, 6))
+#ax = fig.add_subplot(111)
+
+plt.title('Letalidade de Covid19 por DSEI I(1)', fontsize=19)
+for i in sel:
+    letalidade[i].diff().plot(lw=2)
+
 
 plt.legend()
 plt.xticks(rotation=30)
 
 plt.plot()
 
+# %%
+
+fig = plt.figure(figsize=(13, 6))
+#ax = fig.add_subplot(111)
+
+plt.title('Casos Confirmados de Covid19 por DSEI I(1)', fontsize=19)
+for i in sel:
+    confirmed[i].diff(7).plot(lw=2)
+
+
+plt.legend()
+plt.xticks(rotation=30)
+
+plt.plot()
+# %% Casos Confirmados Diário
+
+fig = plt.figure(figsize=(13, 6))
+#ax = fig.add_subplot(111)
+
+plt.title('Óbitos por Covid19 por DSEI I(1) ', fontsize=19)
+for i in sel:
+    deceased[i].diff(7).plot(lw=2)
+
+
+plt.legend()
+plt.xticks(rotation=30)
+
+plt.plot()
 
 # %% Confirmed Cases
 
-fig = plt.figure(figsize=(6, 5))
-ax = fig.add_subplot(111)
+fig = plt.figure(figsize=(13, 6))
+#ax = fig.add_subplot(111)
+
+plt.title('Casos Confirmados de Covid19 Agregados', fontsize=19)
+conf_agg.plot()
 
 
-conf_agg.plot(label='Casos Confirmados Diários')
+#ax = fig.add_subplot(111)
 
-plt.legend()
+
+#plt.legend()
 plt.xticks(rotation=30)
 
 plt.plot()
