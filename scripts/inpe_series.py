@@ -25,7 +25,7 @@ for i in all_reports:
 
 # %%   Constroi série de ocorrência de focos de fogos
 
-freq = 'd'
+freq = 'm'
   
 bdq = pd.concat(bdq_reports)
 
@@ -53,7 +53,7 @@ fig = plt.figure(figsize=(12,6))
 
 
 for i in df_b:
-    df_b[i].rolling(30).mean().plot()    
+    df_b[i].plot()    
 
 
 plt.legend()
@@ -67,7 +67,7 @@ fig = plt.figure(figsize=(12,6))
 
 
 for i in df_b:
-    np.log(df_b[i].rolling(30).mean()).plot()    
+    np.log(df_b[i]).plot()    
 
 
 plt.legend()
@@ -84,7 +84,7 @@ row = 0
 
 for i in biomas:
     title = 'Autocorrelação das queimadas para ' + i
-    plot_acf(df_b[i].resample('m').sum(), lags=36, ax = axs[row][int(col)], title = title)
+    plot_acf(df_b[i], lags=36, ax = axs[row][int(col)], title = title)
     if not col:
         row += 1
     col = not col
@@ -100,7 +100,7 @@ for b in biomas:
     
     title = 'Sazonalidade para ' + b
     
-    df_biome = np.log(df_b[[b]].resample('m').sum())
+    df_biome = np.log(df_b[[b]])
     df_biome = df_biome.reset_index()
     df_biome['Anos'] = list(map(lambda x: x.year, df_biome['Data']))
     df_biome['Mês'] = list(map(lambda x: x.month, df_biome['Data']))
@@ -120,10 +120,10 @@ for i in biomas:
     title = 'Histograma do log de focos para ' + i
     #plot_acf(df_b[i].resample('m').sum(), lags=36, ax = axs[row][int(col)], title = title)
     
-    np.log(df_b[i].resample('m').sum()).plot(bins=30, 
-                                             ax = axs[row][int(col)], 
-                                             kind='hist', 
-                                             title=title)
+    np.log(df_b[i]).plot(bins=30, 
+                        ax = axs[row][int(col)], 
+                        kind='hist', 
+                        title=title)
     axs[row][int(col)].set_ylabel('Frequência')
     if not col:
         row += 1
@@ -131,5 +131,22 @@ for i in biomas:
      
 plt.plot()
 # %%
-pd.plott
-#(df_b[i].resample('m').sum().diff()).hist(bins=30)
+fig, axs = plt.subplots(3,2,figsize=(10,15))
+
+col = True
+row = 0
+
+for i in biomas:
+
+    title = 'Lags das series em log para ' + i
+
+    pd.plotting.lag_plot(np.log(df_b[i]),
+                         ax = axs[row][int(col)])
+                        #title=title)
+    axs[row][int(col)].set_title(title)
+
+    if not col:
+        row += 1
+    col = not col
+     
+plt.plot()
