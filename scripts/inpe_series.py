@@ -2,7 +2,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import os
 import numpy as np
-from statsmodels.graphics.tsaplots import plot_acf
+from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
+from statsmodels.tsa.seasonal import seasonal_decompose
 
 os.chdir(r'C:\Users\felip\OneDrive\Documentos\FEA\Econometria 3')
 
@@ -17,19 +18,28 @@ satelite = 'AQUA_M-T'
 
 bdq_reports = list()
 
-for i in all_reports:    
-    print(i)
-    bdq_i = pd.read_csv(r'data/cleaned/inpe/' + i)
-    bdq_i = bdq_i[bdq_i['satelite'] == satelite]
-    bdq_reports.append(bdq_i)
+def bdq ():
+    for i in all_reports:    
+        print(i)
+        bdq_i = pd.read_csv(r'data/cleaned/inpe/' + i)
+        bdq_i = bdq_i[bdq_i['satelite'] == satelite]
+        bdq_reports.append(bdq_i)
+
+    bdq = pd.concat(bdq_reports)
+    return bdq
+
 
 # %%   Constroi série de ocorrência de focos de fogos
+#bdq = bdq()
+#bdq.to_csv(r'data/cleaned/inpe/bdq_AQUA.csv')
+
+bdq = pd.read_csv(r'data/cleaned/inpe/bdq_AQUA.csv')
 
 freq = 'm'
   
-bdq = pd.concat(bdq_reports)
 
-bdq.datahora = pd.to_datetime(bdq.datahora)
+
+bdq.datahora = pd.to_datetime(bdq['datahora'])
 
 bdq = bdq.set_index('datahora')
 bdq.index.name = 'Data'
@@ -46,6 +56,19 @@ for b in biomas:
     bdq_b = bdq[bdq['bioma'] == b]
     df_b[b] = bdq_b['N'].resample(freq).sum().fillna(0)
 
+# %% Plot de focos das queimadas em nivel com media movel de 30 dias
+
+fig = plt.figure(figsize=(12,6))
+
+
+for i in df_b:
+    (df_b[i] - seasonal_decompose(df_b[i], freq=12).seasonal).plot(label=i)    
+
+
+plt.legend()
+plt.title('Focos de queimadas por bioma')
+
+plt.plot()
 
 # %% Plot de focos das queimadas em nivel com media movel de 30 dias
 
@@ -60,7 +83,6 @@ plt.legend()
 plt.title('Focos de queimadas por bioma')
 
 plt.plot()
-
 # %% Plot de focos das queimadas em log com media movel de 30 dias
 
 fig = plt.figure(figsize=(12,6))
@@ -74,6 +96,19 @@ plt.legend()
 plt.title('Focos de queimadas por bioma (log)')
 
 plt.plot()
+# %% Plot de focos das queimadas em log com media movel de 30 dias diff 12 mese
+
+fig = plt.figure(figsize=(12,6))
+
+
+for i in df_b:
+    np.log(df_b[i]).diff(12).plot()    
+
+
+plt.legend()
+plt.title('Focos de queimadas por bioma com decomosiçao sazonal (log)')
+
+plt.plot()
 
 # %% Plot de Autocorrelação com resample mensal para cada um dos biomas
 
@@ -85,6 +120,22 @@ row = 0
 for i in biomas:
     title = 'Autocorrelação das queimadas para ' + i
     plot_acf(df_b[i], lags=36, ax = axs[row][int(col)], title = title)
+    if not col:
+        row += 1
+    col = not col
+     
+plt.plot()
+
+# %% Plot de Autocorrelação com resample mensal para cada um dos biomas
+
+fig, axs = plt.subplots(3,2,figsize=(13,12))
+
+col = True
+row = 0
+
+for i in biomas:
+    title = 'Autocorrelação das queimadas para ' + i
+    plot_pacf(df_b[i], lags=36, ax = axs[row][int(col)], title = title)
     if not col:
         row += 1
     col = not col
