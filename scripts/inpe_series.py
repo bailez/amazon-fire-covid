@@ -109,7 +109,17 @@ plt.legend()
 plt.title('Focos de queimadas por bioma com decomosiçao sazonal (log)')
 
 plt.plot()
+# %% agregado
+fig = plt.figure(figsize=(12,6))
 
+
+np.log(df_b[:'2020'].sum(axis=1)).diff(12).plot(label='Brasil')
+
+
+plt.legend()
+plt.title('Focos de queimadas por bioma com decomosiçao sazonal (log)')
+
+plt.plot()
 # %% Plot de Autocorrelação com resample mensal para cada um dos biomas
 
 fig, axs = plt.subplots(3,2,figsize=(13,12))
@@ -170,6 +180,7 @@ row = 0
 for i in biomas:
     title = 'Histograma do log de focos para ' + i
     #plot_acf(df_b[i].resample('m').sum(), lags=36, ax = axs[row][int(col)], title = title)
+
     
     np.log(df_b[i]).plot(bins=30, 
                         ax = axs[row][int(col)], 

@@ -154,7 +154,7 @@ plt.xticks(rotation=30)
 plt.plot()
 
 # %%
-queimada = pd.read_csv(r'data/cleaned/inpe/Focos_2021-01-01_2021-09-06.csv')
+queimada = pd.read_csv(r'data/cleaned/inpe/2021.csv')
 
 queimada['datahora'] = pd.to_datetime(queimada['datahora'])
 
