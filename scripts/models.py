@@ -10,7 +10,7 @@ from statsmodels.graphics.api import qqplot
 from statsmodels.tsa.stattools import adfuller
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 from statsmodels.tsa.seasonal import seasonal_decompose
-from statsmodels.stats.diagnostic import het_white, het_breuschpagan, acorr_ljungbox, acorr_breusch_godfrey
+from statsmodels.stats.diagnostic import het_white, het_breuschpagan, acorr_ljungbox, acorr_breusch_godfrey, kstest_normal
 
 # %% Leitura dos dados
 os.chdir(r'C:\Users\felip\OneDrive\Documentos\FEA\Econometria 3')
@@ -22,7 +22,7 @@ satelite = 'AQUA_M-T'
 
 bdq = pd.read_csv(r'data/cleaned/inpe/bdq_AQUA.csv')
 
-freq = 'w'
+freq = 'm'
 
 bdq.datahora = pd.to_datetime(bdq['datahora'])
 
@@ -45,7 +45,7 @@ for b in biomas:
     df[b] = bdq_b['N'].resample(freq).sum().fillna(0)
 
 bioma = 'Cerrado'
-df_raw = df.iloc[1:-1,:]
+df_raw = df.iloc[:-1,:]
 # %% transformacao dos dados
 '''
     Series transformation Logaritmo natural
@@ -81,12 +81,12 @@ axs[3].set_ylim([-1.5,1.5])
 seasonal_resid.plot.scatter(x='Data', y='resid',ax=axs[3])
 plt.axhline(0, color='black')
 
-# %%
+# %% descrição
 '''
 Variable description
 '''
 
-print(df.describe())
+print(df.describe().to_latex())
 # %% ADF
 '''
 Stationarity test
@@ -117,8 +117,8 @@ plt.plot()
 ARMA estimate
 '''
 pqds = [(2,0,1),
-        (3,0,1),
-        (4,0,1)
+        (2,0,2),
+        (4,0,2)
         ]
 
 fig, axs = plt.subplots(3,1,figsize=(8,12))
@@ -153,7 +153,7 @@ for i, j in zip(fits, pqds):
 
     resid_p = i.resid.reset_index()
     resid_p.columns = ['Data', 'resid']
-    axs[c].set_ylim([-0.03,0.03])
+    axs[c].set_ylim([-0.1,0.1])
     
 
 
@@ -163,7 +163,21 @@ for i, j in zip(fits, pqds):
     #i.resid.plot(ax=axs[c])
     axs[c].set_title(title, loc='left')
     c = c + 1
+    
+    # %%
+'''
+Heterokedasticity test
+'''
 
+''' White's Lagrange Multiplier Test for Heteroscedasticity '''
+
+het_white
+
+
+
+''' Breusch-Pagan Lagrange Multiplier Test for Heteroscedasticity '''
+
+het_breuschpagan
 
 #%%
 '''
@@ -174,7 +188,7 @@ fig, axs = plt.subplots(3,1,figsize=(7,14))
 c = 0
 for i, j in zip(fits, pqds):
     title = f'ARIMA{str(j)}'
-    axs[c].set_xlim([-0.03,.03])
+    axs[c].set_xlim([-0.08,.08])
     pd.plotting.lag_plot(fit.resid,ax=axs[c], marker='.')
     axs[c].set_title(title, loc='left')
     c = c + 1
@@ -193,7 +207,14 @@ for i, j in zip(fits, pqds):
     plot_acf(i.resid, lags=40, ax = axs[c])
     axs[c].set_title(title, loc='left')
     c = c + 1
-    
+    # %%
+''''Ljung-Box test of autocorrelation in residuals.'''
+
+acorr_ljungbox(fit.resid, lags=40, return_df=True)
+
+''' Breusch-Godfrey Lagrange Multiplier tests for residual autocorrelation. '''
+
+acorr_breusch_godfrey(fit, nlags=40)
 
 # %% 
 '''
@@ -213,56 +234,42 @@ for i, j in zip(fits, pqds):
 Normality of residual
 '''
 
-
 print(stats.normaltest(fit.resid))
-# %%
-fig = plt.figure(figsize=(12, 8))
-ax = fig.add_subplot(111)
-fig = qqplot(fit.resid, line="q", ax=ax, fit=True)
 
-
-
-# %%
-'''
-Autocorrelation of resid
-'''
-
-''''Ljung-Box test of autocorrelation in residuals.'''
-
-acorr_ljungbox(fit.resid, lags=40, return_df=True)
-
-''' Breusch-Godfrey Lagrange Multiplier tests for residual autocorrelation. '''
-
-acorr_breusch_godfrey(fit, nlags=40)
-
-# %%
-
-fig = plt.figure(figsize=(12, 8))
-ax1 = fig.add_subplot(211)
-fig = sm.graphics.tsa.plot_acf(fit.resid, lags=40, ax=ax1)
-ax2 = fig.add_subplot(212)
-fig = sm.graphics.tsa.plot_pacf(fit.resid, lags=40, ax=ax2)
-
-# %%
 
 '''
 Normality test -> (Kolmogorov-Smirnov test) (p-value)
 '''
 
 norm_test = kstest_normal(fit.resid, dist='norm')
-
 # %%
-
 '''
-Heterokedasticity test
+Distribution
 '''
+fig, axs = plt.subplots(3,1,figsize=(8,14))
 
-''' White's Lagrange Multiplier Test for Heteroscedasticity '''
+c = 0
+for i, j in zip(fits, pqds):
+    title = f'ARIMA{str(j)}'
+    qqplot(i.resid, line="q", ax=axs[c], fit=True)
+    axs[c].set_ylim([-3.5,4])
+    #axs[c].set_title(title, loc='left')
+    c = c + 1    
+    # %%
+'''
+Resid Distribution
+'''
+fig, axs = plt.subplots(3,1,figsize=(8,14))
 
-het_white(resid, )
+c = 0
+for i, j in zip(fits, pqds):
+    
+    #plt.hist(i.resid, ax=axs[c])
+    title = f'Resid histogram ARIMA{str(j)}'
+    i.resid.hist(ax=axs[c], bins = 50)
+    axs[c].set_xlim([-0.1,0.1])
+    axs[c].set_title(title)
+    #axs[c].set_title(title, loc='left')
+    c = c + 1
 
 
-
-''' Breusch-Pagan Lagrange Multiplier Test for Heteroscedasticity '''
-
-het_breuschpagan
