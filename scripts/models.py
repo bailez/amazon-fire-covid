@@ -1,3 +1,4 @@
+# %% Importa modulos
 import matplotlib.pyplot as plt
 import os
 import numpy as np
@@ -8,9 +9,10 @@ from statsmodels.tsa.arima.model import ARIMA
 from statsmodels.graphics.api import qqplot
 from statsmodels.tsa.stattools import adfuller
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
+from statsmodels.tsa.seasonal import seasonal_decompose
 from statsmodels.stats.diagnostic import het_white, het_breuschpagan, acorr_ljungbox, acorr_breusch_godfrey
 
-# %%
+# %% Leitura dos dados
 os.chdir(r'C:\Users\felip\OneDrive\Documentos\FEA\Econometria 3')
 
 all_reports = os.listdir(r'data/cleaned/inpe/')[:-1]
@@ -20,7 +22,7 @@ satelite = 'AQUA_M-T'
 
 bdq = pd.read_csv(r'data/cleaned/inpe/bdq_AQUA.csv')
 
-freq = 'm'
+freq = 'w'
 
 bdq.datahora = pd.to_datetime(bdq['datahora'])
 
@@ -28,7 +30,7 @@ bdq = bdq.set_index('datahora')
 bdq.index.name = 'Data'
 
 bdq['N'] = 1
-# %%
+# %% Selecao da serie
 
 '''
     Series transformation
@@ -43,74 +45,70 @@ for b in biomas:
     df[b] = bdq_b['N'].resample(freq).sum().fillna(0)
 
 bioma = 'Cerrado'
-
-# %%
+df_raw = df.iloc[1:-1,:]
+# %% transformacao dos dados
 '''
     Series transformation Logaritmo natural
 '''
-df0 = df[bioma]
-df1 = np.log(df)
-df2 = np.log(df).diff(12).dropna()
-# %%
+df0 = df_raw[bioma]
+df1 = np.log(df0)
+decomp = seasonal_decompose(df1, model="additive")
+
+df = decomp.trend.dropna()
+
+# %% visualizacao das series transformadas
 '''
-    Series plot
+    Series plot transformations
 '''
-fig, axs = plt.subplots(3,1,figsize=(8,12))
+fig, axs = plt.subplots(4,1,figsize=(7,14))
 
 
 
-plt.title(f'Focos de queimadas para {bioma} aplicadondo ln')
-    
-plt.plot()
-# %%
 
-'''
-    Series transformation
-'''
-df1 = np.log(df).diff(12).dropna()
+df1.plot(ax=axs[0], legend=False)
+axs[0].set(ylabel='log scale')
+
+decomp.trend.plot(ax=axs[1])
+axs[1].set(ylabel='trend')
 
 
+decomp.seasonal.plot(ax=axs[2])
+axs[2].set(ylabel='seasonal')
 
-# %% Plot de focos das queimadas em nivel com media movel de 30 dias
-'''
-    Series plot
-'''
-fig = plt.figure(figsize=(12,6))
 
-df[bioma].plot()    
-
-plt.title(f'Focos de queimadas para {bioma} aplicando ln e diferença de 12 meses')
-    
-plt.plot()
+seasonal_resid = decomp.resid.dropna().reset_index()
+axs[3].set_ylim([-1.5,1.5])
+seasonal_resid.plot.scatter(x='Data', y='resid',ax=axs[3])
+plt.axhline(0, color='black')
 
 # %%
 '''
 Variable description
 '''
-print(df[bioma].describe())
+
+print(df.describe())
 # %% ADF
 '''
 Stationarity test
 '''
 
-adf = adfuller(df[bioma])
+adf = adfuller(df)
 
 print(adf)
 # %%
 '''
 Autocorrelation plot
 '''
-fig, ax = plt.subplots(1,1,figsize=(10,6))
+
+fig, axs = plt.subplots(2,1,figsize=(8,12))
+
+
+
 title = 'Grafico de autocorrelação'
-plot_acf(df[bioma], lags=40, ax = ax, title = title)
-plt.plot()
-# %%
-'''
-Partial Autocorrelation
-'''
-fig, ax = plt.subplots(1,1,figsize=(10,6))
+plot_acf(df, lags=40, ax = axs[0], title = title)
+
 title = 'Grafico de autocorrelação parcial'
-plot_pacf(df[bioma], lags=40, ax = ax, title = title)
+plot_pacf(df, lags=40, ax = axs[1], title = title)
 plt.plot()
 
     
@@ -118,22 +116,104 @@ plt.plot()
 '''
 ARMA estimate
 '''
+pqds = [(2,0,1),
+        (3,0,1),
+        (4,0,1)
+        ]
 
-model = ARIMA(df[bioma], order = (3,0,3))
+fig, axs = plt.subplots(3,1,figsize=(8,12))
+fits = []
+c = 0
+for i in pqds:
 
-fit = model.fit()
+    model = ARIMA(df, order = i)
+
+    fit = model.fit()
+    fits.append(fit)
+    title = f'ARIMA{str(i)}'
+    df.plot(ax=axs[c], label='original data', legend=True)
+    fit.fittedvalues.plot(ax=axs[c], label='fitted values', legend=True)
+    axs[c].set_title(title, loc='left')
+    
+    c = c +1
+
+    print('====================='*5)
+    print(fit.summary().as_latex())
+    
+    #%%
+'''
+Residual plots
+'''
+
+fig, axs = plt.subplots(3,1,figsize=(8,12))
+c = 0
+for i, j in zip(fits, pqds):
+    title = f'ARIMA{str(j)}'
+    
+
+    resid_p = i.resid.reset_index()
+    resid_p.columns = ['Data', 'resid']
+    axs[c].set_ylim([-0.03,0.03])
+    
 
 
-print(fit.summary())
+    resid_p.plot.scatter(x='Data', y='resid',ax=axs[c])
+    
+    
+    #i.resid.plot(ax=axs[c])
+    axs[c].set_title(title, loc='left')
+    c = c + 1
+
+
 #%%
+'''
+Scatter Autocorrelation
+'''
 
+fig, axs = plt.subplots(3,1,figsize=(7,14))
+c = 0
+for i, j in zip(fits, pqds):
+    title = f'ARIMA{str(j)}'
+    axs[c].set_xlim([-0.03,.03])
+    pd.plotting.lag_plot(fit.resid,ax=axs[c], marker='.')
+    axs[c].set_title(title, loc='left')
+    c = c + 1
+# teste de autocorrelação no lag 1
 print(sm.stats.durbin_watson(fit.resid.values))
-# %%
-fig = plt.figure(figsize=(12, 8))
-ax = fig.add_subplot(111)
-ax = fit.resid.plot(ax=ax)
+# %% 
+'''
+Residual Autocorrelation
+'''
+       
+fig, axs = plt.subplots(3,1,figsize=(8,12))
 
+c = 0
+for i, j in zip(fits, pqds):
+    title = f'ARIMA{str(j)}'
+    plot_acf(i.resid, lags=40, ax = axs[c])
+    axs[c].set_title(title, loc='left')
+    c = c + 1
+    
+
+# %% 
+'''
+Residual Partial-Autocorrelation
+'''
+       
+fig, axs = plt.subplots(3,1,figsize=(8,12))
+
+c = 0
+for i, j in zip(fits, pqds):
+    title = f'ARIMA{str(j)}'
+    plot_pacf(i.resid, lags=40, ax = axs[c])
+    axs[c].set_title(title, loc='left')
+    c = c + 1             
 # %%
+'''
+Normality of residual
+'''
+
+
 print(stats.normaltest(fit.resid))
 # %%
 fig = plt.figure(figsize=(12, 8))
