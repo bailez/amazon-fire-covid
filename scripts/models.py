@@ -10,7 +10,7 @@ from statsmodels.graphics.api import qqplot
 from statsmodels.tsa.stattools import adfuller
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 from statsmodels.tsa.seasonal import seasonal_decompose
-from statsmodels.stats.diagnostic import het_white, het_breuschpagan, acorr_ljungbox, acorr_breusch_godfrey, kstest_normal
+from statsmodels.stats.diagnostic import het_white, het_breuschpagan, acorr_ljungbox, acorr_breusch_godfrey, kstest_normal, het_arch
 
 # %% Leitura dos dados
 os.chdir(r'C:\Users\felip\OneDrive\Documentos\FEA\Econometria 3')
@@ -60,26 +60,27 @@ df = decomp.trend.dropna()
 '''
     Series plot transformations
 '''
-fig, axs = plt.subplots(4,1,figsize=(7,14))
-
-
-
+fig, axs = plt.subplots(4,1,figsize=(6,10))
 
 df1.plot(ax=axs[0], legend=False)
-axs[0].set(ylabel='log scale')
+axs[0].set(ylabel='log scale', xlabel='')
+
 
 decomp.trend.plot(ax=axs[1])
-axs[1].set(ylabel='trend')
+axs[1].set(ylabel='trend', xlabel='')
 
 
 decomp.seasonal.plot(ax=axs[2])
-axs[2].set(ylabel='seasonal')
+axs[2].set(ylabel='seasonal', xlabel='')
 
 
 seasonal_resid = decomp.resid.dropna().reset_index()
 axs[3].set_ylim([-1.5,1.5])
 seasonal_resid.plot.scatter(x='Data', y='resid',ax=axs[3])
+axs[3].set(ylabel='resid', xlabel='')
 plt.axhline(0, color='black')
+
+
 
 # %% descrição
 '''
@@ -87,6 +88,7 @@ Variable description
 '''
 
 print(df.describe().to_latex())
+
 # %% ADF
 '''
 Stationarity test
@@ -100,9 +102,7 @@ print(adf)
 Autocorrelation plot
 '''
 
-fig, axs = plt.subplots(2,1,figsize=(8,12))
-
-
+fig, axs = plt.subplots(2,1,figsize=(8,10))
 
 title = 'Grafico de autocorrelação'
 plot_acf(df, lags=40, ax = axs[0], title = title)
@@ -116,14 +116,15 @@ plt.plot()
 '''
 ARMA estimate
 '''
+
 pqds = [(2,0,1),
-        (2,0,2),
-        (4,0,2)
-        ]
+        (3,0,2),
+        (4,0,2)]
 
 fig, axs = plt.subplots(3,1,figsize=(8,12))
 fits = []
 c = 0
+
 for i in pqds:
 
     model = ARIMA(df, order = i)
@@ -132,7 +133,9 @@ for i in pqds:
     fits.append(fit)
     title = f'ARIMA{str(i)}'
     df.plot(ax=axs[c], label='original data', legend=True)
-    fit.fittedvalues.plot(ax=axs[c], label='fitted values', legend=True)
+    fit.fittedvalues.plot(ax=axs[c], label='fitted values', 
+                          legend=True, color='orange',
+                          linestyle=':')
     axs[c].set_title(title, loc='left')
     
     c = c +1
@@ -146,7 +149,9 @@ Residual plots
 '''
 
 fig, axs = plt.subplots(3,1,figsize=(8,12))
+
 c = 0
+
 for i, j in zip(fits, pqds):
     title = f'ARIMA{str(j)}'
     
@@ -154,13 +159,9 @@ for i, j in zip(fits, pqds):
     resid_p = i.resid.reset_index()
     resid_p.columns = ['Data', 'resid']
     axs[c].set_ylim([-0.1,0.1])
-    
-
 
     resid_p.plot.scatter(x='Data', y='resid',ax=axs[c])
-    
-    
-    #i.resid.plot(ax=axs[c])
+      
     axs[c].set_title(title, loc='left')
     c = c + 1
     
@@ -171,7 +172,8 @@ Heterokedasticity test
 
 ''' White's Lagrange Multiplier Test for Heteroscedasticity '''
 
-het_white
+for i in fits:
+    het_white(i.fit)
 
 
 
@@ -213,8 +215,8 @@ for i, j in zip(fits, pqds):
 acorr_ljungbox(fit.resid, lags=40, return_df=True)
 
 ''' Breusch-Godfrey Lagrange Multiplier tests for residual autocorrelation. '''
-
-acorr_breusch_godfrey(fit, nlags=40)
+for i in fits:
+   print(acorr_breusch_godfrey(i, nlags=1))
 
 # %% 
 '''
@@ -240,8 +242,8 @@ print(stats.normaltest(fit.resid))
 '''
 Normality test -> (Kolmogorov-Smirnov test) (p-value)
 '''
-
-norm_test = kstest_normal(fit.resid, dist='norm')
+for i in fits:
+    print(kstest_normal(i.resid, dist='norm'))
 # %%
 '''
 Distribution
@@ -272,4 +274,6 @@ for i, j in zip(fits, pqds):
     #axs[c].set_title(title, loc='left')
     c = c + 1
 
-
+# %%
+for i in fits:
+    print(het_arch(i.resid))
