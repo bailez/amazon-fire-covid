@@ -46,6 +46,7 @@ for b in biomas:
 
 bioma = 'Cerrado'
 df_raw = df.iloc[:-1,:]
+
 # %% transformacao dos dados
 '''
     Series transformation Logaritmo natural
