@@ -173,14 +173,14 @@ Heterokedasticity test
 
 ''' White's Lagrange Multiplier Test for Heteroscedasticity '''
 
-for i in fits:
-    het_white(i.fit)
+#for i in fits:
+ #   het_white(i.fittedvalues)
 
 
 
 ''' Breusch-Pagan Lagrange Multiplier Test for Heteroscedasticity '''
 
-het_breuschpagan
+#het_breuschpagan
 
 #%%
 '''
