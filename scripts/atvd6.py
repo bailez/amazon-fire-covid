@@ -56,7 +56,7 @@ df1 = np.log(df0)
 decomp = seasonal_decompose(df1, model="additive")
 
 df = decomp.trend.dropna()
-
+# %%
 # % visualizacao das series transformadas
 '''
     Series plot transformations
