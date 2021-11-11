@@ -1,6 +1,6 @@
 import os
-os.chdir(r'C:\Users\felip\OneDrive\Documentos\FEA\Econometria 3\amazon-fire-covid\scripts')
-from funcs import plot_seasonalcomp
+os.chdir(r'C:\Users\Felipe.bailez\Desktop\repos_felipe\amazon-fire-covid')
+from scripts.funcs import plot_seasonalcomp
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -9,26 +9,7 @@ from statsmodels.tsa.stattools import adfuller, kpss
 
 
 
-os.chdir(r'C:\Users\felip\OneDrive\Documentos\FEA\Econometria 3')
-'''
-all_reports = os.listdir(r'data/cleaned/inpe/')[:-1]
-satelite = 'AQUA_M-T'
-bdq = pd.read_csv(r'data/cleaned/inpe/bdq_AQUA.csv')
-freq = 'w'
-bdq.datahora = pd.to_datetime(bdq['datahora'])
-bdq = bdq.set_index('datahora')
-bdq.index.name = 'Data'
-bdq['N'] = 1
-
-df = pd.DataFrame()
-
-biomas = bdq.bioma.drop_duplicates().dropna().values
-
-for b in biomas:
-    bdq_b = bdq[bdq['bioma'] == b]
-    df[b] = bdq_b['N'].resample(freq).sum().fillna(0)
-'''
-df = pd.read_excel(r'amazon-fire-covid\data.xlsx')
+df = pd.read_excel(r'data.xlsx')
 df = df.set_index('Data')
 biomas = ['Cerrado', 'Mata Atlantica', 'Amazonia']
 
@@ -56,10 +37,13 @@ for i in decomp:
 '''
 Variable description
 '''
+desc = []
 for i in biomas:
     print('\n\n', i,'\n')
-    print(trends[i].describe().to_latex())
-
+    desc.append(trends[i].describe())
+desc = pd.concat(desc, axis = 1)
+desc.columns = biomas
+print(desc.to_latex())
 fig, axs = plt.subplots(3,1,figsize=(8,12))
 c= 0
 for i in biomas:
