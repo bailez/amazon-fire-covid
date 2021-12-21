@@ -37,6 +37,7 @@ for i in decomp:
 
 data = pd.DataFrame(trends)
 df = data.dropna()
+dff = df.diff().dropna()
 # %%%
     
 #---------------------------------------
@@ -46,7 +47,7 @@ df = data.dropna()
 # To select the right order of the VAR model, we iteratively fit increasing orders 
 # of VAR model and pick the order that gives a model with least AIC.
 orders = pd.DataFrame(columns = ['AIC', 'BIC', 'FPE', 'HQIC'])
-model = VAR(df)
+model = VAR(dff)
 for i in range(0,13):
     result = model.fit(i)
     print('Lag Order =', i)
@@ -68,9 +69,11 @@ orders.index.name = "Order"
 
 print(orders.to_latex())
 
-model_fitted = model.fit(3)
-print(model_fitted.summary())
+x = model.select_order(maxlags=12)
 
+model_fitted = model.fit(3)
+#print(model_fitted.summary())
+# %%
 #---------------------------------------
 # check for remaining serial correlation
 #---------------------------------------
