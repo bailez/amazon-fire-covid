@@ -43,11 +43,11 @@ dff = df.diff().dropna()
 
 
 # %%
-
+maxlags = 20
 
 orders = pd.DataFrame(columns = ['AIC', 'BIC', 'FPE', 'HQIC'])
 model = VAR(dff)
-for i in range(0,13):
+for i in range(0,maxlags):
     result = model.fit(i)
     print('Lag Order =', i)
     print('AIC : ', result.aic)
@@ -63,9 +63,10 @@ orders.index.name = "Order"
 
 print(orders.to_latex())
 
-x = model.select_order(maxlags=12)
+x = model.select_order(maxlags=maxlags)
+print(x.summary())
 
-model_fitted = model.fit(3)
+results = model.fit(12)
 # %%
 
 
@@ -93,3 +94,26 @@ print(granger_test.to_latex())
 
 
 
+results.plot()
+# %%
+results.plot_acorr()
+
+# %%
+
+# impulse response
+
+irf = results.irf(10)
+
+irf.plot(orth=False)
+
+irf.plot_cum_effects(orth=False)
+# %%
+
+fevd = results.fevd(5)
+fevd.summary()
+
+for i in fevd.decomp:
+    
+    print(pd.DataFrame(i, columns = df.columns).to_latex())
+
+results.fevd(20).plot()
