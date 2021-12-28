@@ -10,7 +10,7 @@ all_reports = os.listdir(r'data/cleaned/ms-dsei')
 
 aldeias = r'data/cleaned/funai/aldeias/aldeiasPoint.shp'
 
-bioma = gpd.read_file(r'C:\Users\felip\Downloads\Biomas_250mil\lm_bioma_250.shp')
+#bioma = gpd.read_file(r'C:\Users\felip\Downloads\Biomas_250mil\lm_bioma_250.shp')
 
 ald = gpd.read_file(aldeias)
 
@@ -21,9 +21,9 @@ queimada = pd.read_csv(r'data/cleaned/inpe/2010.csv')
 
 queimada['datahora'] = pd.to_datetime(queimada.datahora)
 
-#queimada_set = queimada[queimada['datahora'] == '202']
-queimada_set = queimada[queimada['satelite'] == 'AQUA_M-T']
-#queimada_set = queimada_set[queimada_set['satelite'] == 'AQUA_M-T']['2020']
+queimada_set = queimada[queimada['datahora'] > '2020-01-25']
+#queimada_set = queimada[queimada['satelite'] == 'AQUA_M-T']
+queimada_set = queimada_set[queimada_set['satelite'] == 'AQUA_M-T']['2020-12-12']
 
 
 points = list(map(lambda x, y: Point(x,y), 
@@ -35,6 +35,7 @@ q_set = gpd.GeoDataFrame(queimada_set, geometry=points)
 ## separate queimadas
 # %%
 for i in q_set.index:
+    print(i)
     
     point = q_set.loc[i]['geometry']
     

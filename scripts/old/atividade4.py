@@ -44,9 +44,9 @@ sel = list(sel.iloc[l_b:u_b].index)
 fig = plt.figure(figsize=(13, 6))
 #ax = fig.add_subplot(111)
 
-plt.title('Casos Confirmados de Covid19 por DSEI', fontsize=19)
+plt.title('Casos Confirmados de Covid19 por DSEI (log)', fontsize=19)
 for i in sel:
-    confirmed[i].plot(lw=2)
+    np.log(confirmed[i]).plot(lw=2)
 
 
 plt.legend()
@@ -58,9 +58,9 @@ plt.plot()
 fig = plt.figure(figsize=(13, 6))
 #ax = fig.add_subplot(111)
 
-plt.title('Óbitos por Covid19 por DSEI ', fontsize=19)
+plt.title('Óbitos por Covid19 por DSEI (log) ', fontsize=19)
 for i in sel:
-    deceased[i].plot(lw=2)
+    np.log(deceased[i]).plot(lw=2)
 
 
 plt.legend()

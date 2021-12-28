@@ -1,5 +1,5 @@
 import os
-os.chdir(r'C:\Users\Felipe.bailez\Desktop\repos_felipe\amazon-fire-covid')
+os.chdir(r'C:\Users\felip\OneDrive\Documentos\FEA\Econometria 3\amazon-fire-covid')
 from scripts.funcs import plot_seasonalcomp
 import pandas as pd
 import numpy as np
@@ -11,6 +11,7 @@ from statsmodels.tsa.stattools import adfuller, kpss
 
 df = pd.read_excel(r'data.xlsx')
 df = df.set_index('Data')
+df = df['2020':]
 biomas = ['Cerrado', 'Mata Atlantica', 'Amazonia']
 
 df = df[biomas]

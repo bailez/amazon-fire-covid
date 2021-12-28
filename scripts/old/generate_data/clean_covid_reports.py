@@ -60,7 +60,7 @@ def create_panel(table : list,
     
     return df
 
-## == ## == ## == ## == ## == ## == ## == ## == ## == ## == ## == ## == ##
+# %% == ## == ## == ## == ## == ## == ## == ## == ## == ## == ## == ## == ##
 
 all_reports = os.listdir(r'data/raw/ms-dsei/')
 

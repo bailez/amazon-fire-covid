@@ -12,7 +12,7 @@ from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 from statsmodels.tsa.seasonal import seasonal_decompose
 from statsmodels.stats.diagnostic import het_white, het_breuschpagan, acorr_ljungbox, acorr_breusch_godfrey, kstest_normal, het_arch
 
-# % Leitura dos dados
+# %% Leitura dos dados
 os.chdir(r'C:\Users\felip\OneDrive\Documentos\FEA\Econometria 3')
 
 all_reports = os.listdir(r'data/cleaned/inpe/')[:-1]
@@ -22,11 +22,12 @@ satelite = 'AQUA_M-T'
 
 bdq = pd.read_csv(r'data/cleaned/inpe/bdq_AQUA.csv')
 
-freq = 'w'
+freq = 'd'
 
 bdq.datahora = pd.to_datetime(bdq['datahora'])
 
 bdq = bdq.set_index('datahora')
+bdqq = bdq['2020':]
 bdq.index.name = 'Data'
 
 bdq['N'] = 1
@@ -42,11 +43,11 @@ biomas = bdq.bioma.drop_duplicates().dropna().values
 
 for b in biomas:
     bdq_b = bdq[bdq['bioma'] == b]
-    df[b] = bdq_b['N'].resample(freq).sum().fillna(0)
+    df[b] = bdq_b['N'].fillna(0)
 
 bioma = 'Cerrado'
 df_raw = df.iloc[:-1,:]
-
+# %%
 # % transformacao dos dados
 '''
     Series transformation Logaritmo natural
